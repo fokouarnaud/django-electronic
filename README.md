@@ -50,7 +50,7 @@ simulation ou de vidéo est ignorée, jamais affichée.
 
 ## Démarrage en local
 
-Prérequis : **Python 3.10 à 3.13** (mêmes versions que PythonAnywhere) et git. **Ni Node.js ni
+Prérequis : **Python 3.12 ou 3.13** (django-unfold 0.108 exige Python ≥ 3.12 ; PythonAnywhere propose les deux) et git. **Ni Node.js ni
 gettext** : le CSS Tailwind compilé et les traductions `.mo` sont déjà dans le dépôt.
 
 ### 1. Récupérer le code et installer
@@ -148,8 +148,8 @@ ruff check . && ruff format --check . # lint + formatage (config dans pyproject.
 python manage.py makemigrations --check --dry-run   # aucune migration oubliée
 ```
 
-La CI (`.github/workflows/ci.yml`) rejoue tout cela sous Python 3.10 et 3.13 (les bornes de
-PythonAnywhere), puis `collectstatic`, `check --deploy` et la suite complète **en réglages de
+La CI (`.github/workflows/ci.yml`) rejoue tout cela sous Python 3.12 et 3.13 (les versions
+PythonAnywhere compatibles), puis `collectstatic`, `check --deploy` et la suite complète **en réglages de
 production**. Toute nouvelle dépréciation Django 6.0 fait échouer les tests (`pytest.ini`).
 
 ### Simuler la production en local
@@ -268,7 +268,7 @@ cd ~
 git clone https://github.com/fokouarnaud/django-electronic.git     # branche main
 cd django-electronic
 
-mkvirtualenv --python=/usr/bin/python3.12 electronics    # 3.10 à 3.13 ; s'active tout seul
+mkvirtualenv --python=/usr/bin/python3.12 electronics    # 3.12 ou 3.13 (pas moins : Unfold l'exige) ; s'active tout seul
 pip install -r requirements.txt                          # production uniquement (~60 Mo)
 
 # Indispensable : sans cette variable, manage.py charge les réglages de développement,

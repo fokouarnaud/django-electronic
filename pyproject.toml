@@ -2,12 +2,12 @@
 name = "electronics-lab"
 version = "0.1.0"
 description = "Plateforme bilingue (FR/EN) d'apprentissage de l'électronique"
-requires-python = ">=3.10"
+requires-python = ">=3.12"  # django-unfold 0.108 requires 3.12+
 
 # --- Lint + format ----------------------------------------------------------
 [tool.ruff]
 line-length = 110
-target-version = "py310"          # PythonAnywhere offers 3.10-3.13
+target-version = "py312"          # PythonAnywhere offers 3.12 and 3.13
 extend-exclude = [".revision", "apps/*/migrations"]
 
 [tool.ruff.lint]
