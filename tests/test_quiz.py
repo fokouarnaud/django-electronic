@@ -141,8 +141,8 @@ def test_query_count_is_constant(client, card, django_assert_max_num_queries):
         client.get(quiz_url("fr"))
 
 
-def test_home_links_to_quiz(client, card):
-    body = client.get("/fr/").content.decode()
+def test_concept_page_links_to_quiz(client, card):
+    body = client.get("/fr/chapters/ac/concepts/faraday/").content.decode()
     assert quiz_url("fr") in body
 
 

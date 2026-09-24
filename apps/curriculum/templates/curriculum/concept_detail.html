@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load i18n static curriculum_extras %}
+{% block title %}{{ concept.title }} · {% trans "Electronics Lab" %}{% endblock %}
+
+{% block content %}
+<a href="{% url 'curriculum:home' %}" class="inline-flex items-center gap-1.5 rounded-md text-sm text-slate-400 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400">
+    <span aria-hidden="true">←</span> {% trans "Back to chapters" %}
+</a>
+
+<header class="mt-4 animate-rise motion-reduce:animate-none">
+    <p class="text-xs font-medium uppercase tracking-wider text-teal-400">{{ chapter.title }}</p>
+    <div class="mt-1 flex flex-wrap items-center gap-3">
+        <h1 class="text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl">{{ concept.title }}</h1>
+        <span data-status="{{ concept.status }}"
+              class="rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
+              {% if concept.status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
+              {% elif concept.status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
+              {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ concept.get_status_display }}</span>
+    </div>
+</header>
+
+{# Asymmetric grid: reading column (3/5) + stacked widgets (2/5); single column on mobile. #}
+<div class="mt-6 grid gap-6 lg:grid-cols-5 lg:items-start">
+
+    {# ---------- Left: explanation + book notes ---------- #}
+    <div class="space-y-6 lg:col-span-3">
+        <section class="animate-rise rounded-2xl border border-slate-800 bg-slate-900/60 p-5 motion-reduce:animate-none sm:p-6" style="animation-delay: 40ms">
+            <h2 class="text-xs font-medium uppercase tracking-wider text-slate-500">{% trans "Explanation" %}</h2>
+            {% with text=concept.clear_text_explanation %}
+            {% if text %}
+            <div class="mt-4 max-w-prose text-[15px] leading-7 text-slate-300
+                        [&_a]:text-teal-400 [&_a]:underline [&_a]:underline-offset-2
+                        [&_code]:rounded [&_code]:bg-slate-800 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-teal-300
+                        [&_h2]:mt-6 [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-100
+                        [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-semibold [&_h3]:text-slate-100
+                        [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5
+                        [&_p]:my-3 [&_strong]:font-semibold [&_strong]:text-slate-100
+                        [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-950 [&_pre]:p-3
+                        [&_blockquote]:border-l-2 [&_blockquote]:border-teal-500/40 [&_blockquote]:pl-4 [&_blockquote]:text-slate-400
+                        [&_table]:w-full [&_td]:border [&_td]:border-slate-800 [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-slate-800 [&_th]:px-2 [&_th]:py-1">
+                {{ text|render_markdown }}
+            </div>
+            {% else %}
+            <p class="mt-4 text-sm text-slate-500">{% trans "No explanation yet." %}</p>
+            {% endif %}
+            {% endwith %}
+        </section>
+
+        {% if book_sections %}
+        <section class="animate-rise rounded-2xl border border-slate-800 bg-slate-900/60 p-5 motion-reduce:animate-none sm:p-6" style="animation-delay: 80ms">
+            <h2 class="text-xs font-medium uppercase tracking-wider text-slate-500">{% trans "Book notes" %}</h2>
+            <ul class="mt-3 divide-y divide-slate-800/80">
+                {% for link in book_sections %}
+                <li class="py-2.5 text-sm">
+                    {% if link.url %}
+                    <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="rounded text-slate-200 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{{ link.title }} <span aria-hidden="true">↗</span></a>
+                    {% else %}
+                    <span class="text-slate-200">{{ link.title }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+    </div>
+
+    {# ---------- Right: interactive widgets ---------- #}
+    <aside class="space-y-6 lg:col-span-2">
+        {% for sim in simulations %}
+        <section class="animate-rise rounded-2xl border border-slate-800 bg-slate-900/60 p-4 transition-[border-color] duration-200 ease-out hover:border-teal-500/40 motion-reduce:animate-none" style="animation-delay: 80ms">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xs font-medium uppercase tracking-wider text-slate-500">{% trans "Simulation" %}{% if sim.title %} · <span class="normal-case tracking-normal text-slate-300">{{ sim.title }}</span>{% endif %}</h2>
+                <a href="{{ sim.open_url }}" target="_blank" rel="noopener noreferrer" class="shrink-0 rounded text-xs text-teal-400 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{% trans "Open full screen" %} <span aria-hidden="true">↗</span></a>
+            </div>
+            {# Fixed aspect ratio + clipped wrapper: the frame fills it, so no stray scrollbars or page jump. #}
+            <div data-embed-frame class="relative mt-3 aspect-[4/3] w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                <iframe src="{{ sim.src }}" title="{% trans 'Simulation' %}{% if sim.title %}: {{ sim.title }}{% endif %}"
+                        class="absolute inset-0 size-full border-0"
+                        sandbox="allow-scripts allow-same-origin" loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+        </section>
+        {% endfor %}
+
+        {% if video %}
+        <section {% if video.own %}data-own-video{% endif %} class="animate-rise rounded-2xl border border-slate-800 bg-slate-900/60 p-4 transition-[border-color] duration-200 ease-out hover:border-teal-500/40 motion-reduce:animate-none" style="animation-delay: 120ms">
+            <h2 class="text-xs font-medium uppercase tracking-wider text-slate-500">{% if video.own %}{% trans "My breakdown video" %}{% else %}{% trans "Video" %}{% if video.title %} · <span class="normal-case tracking-normal text-slate-300">{{ video.title }}</span>{% endif %}{% endif %}</h2>
+            <div data-embed-frame class="relative mt-3 aspect-video w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+                <iframe src="{{ video.src }}" title="{% trans 'Video' %}"
+                        class="absolute inset-0 size-full border-0"
+                        sandbox="allow-scripts allow-same-origin allow-presentation" loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+            </div>
+        </section>
+        {% endif %}
+    </aside>
+</div>
+
+{# ---------- Navigation flow ---------- #}
+<nav class="mt-8 flex flex-wrap items-center gap-3 animate-rise motion-reduce:animate-none" style="animation-delay: 160ms" aria-label="{% trans 'Concept navigation' %}">
+    <a href="{% url 'curriculum:quiz' chapter.slug concept.slug %}" data-magnetic
+       class="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-[transform,background-color] duration-200 ease-out hover:bg-teal-300 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">
+        {% trans "Take the quiz" %}
+        {% if question_count %}<span class="rounded-md bg-slate-950/15 px-1.5 py-0.5 text-xs tabular-nums">{{ question_count }}</span>{% endif %}
+    </a>
+    {% if next_concept %}
+    <a href="{% url 'curriculum:concept_detail' next_concept.chapter.slug next_concept.slug %}" data-magnetic
+       class="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-5 py-2.5 text-sm font-medium text-slate-200 transition-[transform,border-color] duration-200 ease-out hover:border-teal-500/40 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">
+        {% trans "Next concept" %} <span aria-hidden="true">→</span>
+    </a>
+    {% endif %}
+</nav>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'curriculum/magnetic.js' %}" defer></script>
+{% endblock %}

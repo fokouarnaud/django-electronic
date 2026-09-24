@@ -188,3 +188,39 @@ msgstr "Aucune question pour le moment."
 #, python-format
 msgid "Question %(n)s of %(total)s"
 msgstr "Question %(n)s sur %(total)s"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "No explanation yet."
+msgstr "Aucune explication pour le moment."
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Book notes"
+msgstr "Notes du livre"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Simulation"
+msgstr "Simulation"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Open full screen"
+msgstr "Ouvrir en plein écran"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "My breakdown video"
+msgstr "Ma vidéo d'explication"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Video"
+msgstr "Vidéo"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Concept navigation"
+msgstr "Navigation entre concepts"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Take the quiz"
+msgstr "Passer le quiz"
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Next concept"
+msgstr "Concept suivant"

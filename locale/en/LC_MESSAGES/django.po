@@ -189,3 +189,39 @@ msgstr ""
 #, python-format
 msgid "Question %(n)s of %(total)s"
 msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "No explanation yet."
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Book notes"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Simulation"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Open full screen"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "My breakdown video"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Video"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Concept navigation"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Take the quiz"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/concept_detail.html
+msgid "Next concept"
+msgstr ""

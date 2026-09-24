@@ -39,7 +39,7 @@
             <li class="flex items-center justify-between gap-3 py-2.5">
                 <span class="flex items-baseline gap-3 text-sm text-slate-200">
                     <span class="w-5 text-right text-xs tabular-nums text-slate-600">{{ forloop.counter }}</span>
-                    <a href="{% url 'curriculum:quiz' chapter.slug concept.slug %}" class="rounded transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{{ concept.title }}</a>
+                    <a href="{% url 'curriculum:concept_detail' chapter.slug concept.slug %}" class="rounded transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{{ concept.title }}</a>
                 </span>
                 <span data-status="{{ concept.status }}"
                       class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
@@ -54,7 +54,7 @@
 
         {% if chapter.first_concept %}
         <div class="mt-auto pt-5">
-            <a href="{% url 'curriculum:quiz' chapter.slug chapter.first_concept.slug %}"
+            <a href="{% url 'curriculum:concept_detail' chapter.slug chapter.first_concept.slug %}"
                class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-teal-400 ring-1 ring-inset ring-teal-500/20 transition-colors duration-200 ease-out hover:bg-cyan-500/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{% trans "Start" %} <span aria-hidden="true">→</span></a>
         </div>
         {% endif %}

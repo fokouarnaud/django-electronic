@@ -1,7 +1,9 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView
 
-from .models import Chapter, Concept, Flashcard
+from .embeds import falstad_embed_url, youtube_embed_url
+from .models import Chapter, Concept, Flashcard, ResourceLink, UserProgress
 
 
 class HomeView(TemplateView):
@@ -54,4 +56,69 @@ class QuizView(TemplateView):
             "choices"
         )
         context.update(concept=concept, chapter=concept.chapter, flashcards=list(flashcards))
+        return context
+
+
+class ConceptDetailView(TemplateView):
+    """Explanation (Markdown) + Falstad simulation + video for one concept."""
+
+    template_name = "curriculum/concept_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        concept = get_object_or_404(
+            Concept.objects.select_related("chapter"),
+            slug=kwargs["concept_slug"],
+            chapter__slug=kwargs["chapter_slug"],
+        )
+        chapter = concept.chapter
+        resources = list(concept.resources.all())
+
+        simulations = []
+        for link in resources:
+            if link.type == ResourceLink.Type.FALSTAD_SIMULATION:
+                embed = falstad_embed_url(link.url)
+                if embed:  # untrusted hosts are silently not embedded
+                    simulations.append({"title": link.title, "src": embed, "open_url": embed})
+
+        # The user's own OBS video (private to them) wins over reference videos.
+        own_video = None
+        if self.request.user.is_authenticated:
+            progress = UserProgress.objects.filter(user=self.request.user, concept=concept).first()
+            own_video = youtube_embed_url(progress.youtube_obs_embedded_url) if progress else None
+        reference_videos = [
+            {"title": link.title, "src": src}
+            for link in resources
+            if link.type == ResourceLink.Type.YOUTUBE_REFERENCE
+            for src in [youtube_embed_url(link.url)]
+            if src
+        ]
+        video = {"src": own_video, "own": True} if own_video else (
+            {"src": reference_videos[0]["src"], "own": False, "title": reference_videos[0]["title"]}
+            if reference_videos
+            else None
+        )
+
+        # Next concept: following one in this chapter, else first of the next chapter.
+        next_concept = (
+            Concept.objects.select_related("chapter")
+            .filter(
+                Q(chapter=chapter, order__gt=concept.order)
+                | Q(chapter=chapter, order=concept.order, id__gt=concept.id)
+                | Q(chapter__order__gt=chapter.order)
+                | Q(chapter__order=chapter.order, chapter__id__gt=chapter.id)
+            )
+            .order_by("chapter__order", "chapter__id", "order", "id")
+            .first()
+        )
+
+        context.update(
+            concept=concept,
+            chapter=chapter,
+            book_sections=[r for r in resources if r.type == ResourceLink.Type.BOOK_SECTION],
+            simulations=simulations,
+            video=video,
+            question_count=concept.flashcards.count(),
+            next_concept=next_concept,
+        )
         return context
