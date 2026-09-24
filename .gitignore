@@ -1,0 +1,28 @@
+# Système de révision local (Quiz Flask + Base SQLite cachée)
+.revision/
+
+#claude md
+.CLAUDE.md
+.agents
+skills-lock.json
+CLAUDE.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+.env
+
+# django-tailwind (Node) — node_modules est lourd et inutile en prod (PythonAnywhere
+# n'a pas Node.js) : on committe le CSS compilé (theme/static/css/dist/) et on
+# construit uniquement en local avec `python manage.py tailwind build`.
+theme/static_src/node_modules/
