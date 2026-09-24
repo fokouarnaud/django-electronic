@@ -41,14 +41,10 @@
             <li class="flex items-center justify-between gap-3 border-l-2 py-2.5 pl-3 {% if concept.is_mastered %}border-emerald-500/30{% else %}border-transparent{% endif %}">
                 <span class="flex items-baseline gap-3 text-sm text-slate-200">
                     <span class="w-5 text-right text-xs tabular-nums text-slate-600">{{ forloop.counter }}</span>
-                    <a href="{% url 'curriculum:concept_detail' chapter.slug concept.slug %}" class="rounded transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{{ concept.title }}</a>
+                    <a href="{{ concept.get_absolute_url }}" class="rounded transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{{ concept.title }}</a>
                     {% if concept.is_mastered %}<span data-check class="text-emerald-400" aria-hidden="true">✓</span>{% endif %}
                 </span>
-                <span data-status="{{ concept.effective_status }}"
-                      class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-                      {% if concept.effective_status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
-                      {% elif concept.effective_status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
-                      {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ concept.status_label }}</span>
+                {% include "curriculum/_status_badge.html" with status=concept.effective_status label=concept.status_label %}
             </li>
             {% empty %}
             <li class="py-2.5 text-sm text-slate-500">{% trans "No concepts yet." %}</li>
@@ -57,7 +53,7 @@
 
         {% if chapter.first_concept %}
         <div class="mt-auto pt-5">
-            <a href="{% url 'curriculum:concept_detail' chapter.slug chapter.first_concept.slug %}"
+            <a href="{{ chapter.first_concept.get_absolute_url }}"
                class="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-teal-400 ring-1 ring-inset ring-teal-500/20 transition-colors duration-200 ease-out hover:bg-cyan-500/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{% trans "Start" %} <span aria-hidden="true">→</span></a>
         </div>
         {% endif %}

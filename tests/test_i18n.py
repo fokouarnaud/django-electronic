@@ -54,9 +54,7 @@ def test_set_language_switches_context_to_english(client):
 def test_set_language_can_switch_back_to_french(client):
     home = reverse("curriculum:home")
     client.post(reverse("set_language"), {"language": "en", "next": home})
-    response = client.post(
-        reverse("set_language"), {"language": "fr", "next": home}, follow=True
-    )
+    response = client.post(reverse("set_language"), {"language": "fr", "next": home}, follow=True)
     assert response.context["LANGUAGE_CODE"] == "fr"
     assert "Chapitres" in response.content.decode()
 

@@ -18,7 +18,8 @@ def main():
         po = polib.pofile(str(po_path))
         mo_path = po_path.with_suffix(".mo")
         po.save_as_mofile(str(mo_path))
-        print(f"{po_path.relative_to(LOCALE_DIR.parent)} -> {mo_path.name} ({len(po.translated_entries())} translated)")
+        translated = len(po.translated_entries())
+        print(f"{po_path.relative_to(LOCALE_DIR.parent)} -> {mo_path.name} ({translated} translated)")
 
 
 if __name__ == "__main__":

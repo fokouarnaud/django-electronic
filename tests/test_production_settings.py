@@ -19,6 +19,8 @@ ENV_VARS = (
     "DJANGO_SSL_REDIRECT",
     "DJANGO_HSTS_SECONDS",
     "DJANGO_ENV_FILE",
+    "DATABASE_URL",
+    "DJANGO_ADMIN_URL",
 )
 
 
@@ -176,11 +178,18 @@ def test_production_allowed_hosts(prod):
 
 def test_production_extra_hosts_from_environment(monkeypatch, tmp_path):
     prod = load(
-        monkeypatch, "production", tmp_path,
-        DJANGO_SECRET_KEY=GOOD_KEY, DJANGO_ALLOWED_HOSTS="labo.example.org, other.test",
+        monkeypatch,
+        "production",
+        tmp_path,
+        DJANGO_SECRET_KEY=GOOD_KEY,
+        DJANGO_ALLOWED_HOSTS="labo.example.org, other.test",
     )
     assert prod.ALLOWED_HOSTS == [
-        "localhost", "127.0.0.1", ".pythonanywhere.com", "labo.example.org", "other.test",
+        "localhost",
+        "127.0.0.1",
+        ".pythonanywhere.com",
+        "labo.example.org",
+        "other.test",
     ]
 
 
@@ -203,8 +212,12 @@ def test_production_hardening(prod):
 def test_production_https_redirect_and_hsts_are_opt_in(prod, monkeypatch, tmp_path):
     assert prod.SECURE_SSL_REDIRECT is False and prod.SECURE_HSTS_SECONDS == 0
     strict = load(
-        monkeypatch, "production", tmp_path,
-        DJANGO_SECRET_KEY=GOOD_KEY, DJANGO_SSL_REDIRECT="1", DJANGO_HSTS_SECONDS="3600",
+        monkeypatch,
+        "production",
+        tmp_path,
+        DJANGO_SECRET_KEY=GOOD_KEY,
+        DJANGO_SSL_REDIRECT="1",
+        DJANGO_HSTS_SECONDS="3600",
     )
     assert strict.SECURE_SSL_REDIRECT is True and strict.SECURE_HSTS_SECONDS == 3600
 
@@ -261,3 +274,45 @@ def test_collectstatic_packages_hashed_and_compressed_assets(tmp_path, settings,
     assert not [p for p in shipped_css if '@import "tailwindcss"' in p.read_text(encoding="utf-8")], (
         "uncompiled Tailwind source was collected"
     )
+
+
+# --- Critique pass: database URL, logging, admin URL, pinning, CI ------------
+def test_database_defaults_to_sqlite_and_accepts_database_url(monkeypatch, tmp_path):
+    base = load(monkeypatch, "base", tmp_path)
+    assert base.DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3"
+    assert pathlib.Path(base.DATABASES["default"]["NAME"]) == ROOT / "db.sqlite3"
+    pg = load(monkeypatch, "base", tmp_path, DATABASE_URL="postgres://u:p@db.example:5432/lab")
+    assert pg.DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql"
+    assert pg.DATABASES["default"]["NAME"] == "lab"
+
+
+def test_production_logs_errors_to_the_console(prod):
+    assert prod.LOGGING["handlers"]["console"]["class"] == "logging.StreamHandler"
+    assert prod.LOGGING["root"]["handlers"] == ["console"]
+    assert prod.LOGGING["loggers"]["django.request"]["level"] == "ERROR"
+
+
+def test_admin_url_is_configurable(monkeypatch, tmp_path):
+    assert load(monkeypatch, "base", tmp_path).ADMIN_URL == "admin/"
+    custom = load(monkeypatch, "base", tmp_path, DJANGO_ADMIN_URL="gestion-7f3a/")
+    assert custom.ADMIN_URL == "gestion-7f3a/"
+
+
+def test_admin_is_mounted_on_admin_url():
+    from django.urls import reverse
+
+    assert reverse("admin:index") == "/admin/"
+
+
+@pytest.mark.parametrize("name", ["requirements.txt", "requirements-dev.txt"])
+def test_requirements_are_pinned(name):
+    for raw in (ROOT / name).read_text(encoding="utf-8").splitlines():
+        line = raw.split("#")[0].strip()
+        if line and not line.startswith("-r"):
+            assert "==" in line, f"unpinned dependency in {name}: {line}"
+
+
+def test_ci_runs_lint_tests_and_migration_check():
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    for step in ("ruff check", "ruff format --check", "pytest", "makemigrations --check"):
+        assert step in workflow

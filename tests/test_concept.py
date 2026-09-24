@@ -10,7 +10,9 @@ from django.utils import translation
 from apps.curriculum.embeds import falstad_embed_url, youtube_embed_url
 from apps.curriculum.models import Chapter, Concept, Flashcard, ResourceLink, UserProgress
 
-FALSTAD = "https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWcMBMcUHYHMBOA0mAtNAGgDYA2AZmhFHGEA"
+FALSTAD = (
+    "https://www.falstad.com/circuit/circuitjs.html?ctz=CQAgjCAMB0l3BWcMBMcUHYHMBOA0mAtNAGgDYA2AZmhFHGEA"
+)
 YOUTUBE_REF = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 OBS_VIDEO = "https://youtu.be/abc123XYZ_-"
 
@@ -43,7 +45,10 @@ def concept(chapter):
     "raw, expected",
     [
         ("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"),
-        ("https://youtube.com/watch?v=dQw4w9WgXcQ&t=10s", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"),
+        (
+            "https://youtube.com/watch?v=dQw4w9WgXcQ&t=10s",
+            "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+        ),
         ("https://youtu.be/abc123XYZ_-", "https://www.youtube-nocookie.com/embed/abc123XYZ_-"),
         ("https://www.youtube.com/embed/dQw4w9WgXcQ", "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"),
         ("https://www.youtube.com/watch?v=" + "x" * 30, None),
@@ -108,15 +113,15 @@ def test_blank_english_explanation_falls_back_to_french(client, concept):
 
 
 def test_missing_explanation_shows_placeholder(client, concept):
-    Concept.objects.filter(pk=concept.pk).update(
-        clear_text_explanation_fr="", clear_text_explanation_en=""
-    )
+    Concept.objects.filter(pk=concept.pk).update(clear_text_explanation_fr="", clear_text_explanation_en="")
     assert "No explanation yet." in client.get(url("en")).content.decode()
 
 
 def test_markdown_renders_but_raw_html_is_escaped(client, concept):
     Concept.objects.filter(pk=concept.pk).update(
-        clear_text_explanation_fr="## Titre\n\n- a\n- b\n\n<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>"
+        clear_text_explanation_fr=(
+            "## Titre\n\n- a\n- b\n\n<script>alert(1)</script>\n\n<img src=x onerror=alert(1)>"
+        )
     )
     body = client.get(url("fr")).content.decode()
     assert "<h2" in body and "<li>a</li>" in body
@@ -149,16 +154,17 @@ def test_untrusted_simulation_host_is_not_embedded(client, concept):
 
 
 def test_youtube_reference_is_embedded_when_no_own_video(client, concept):
-    ResourceLink.objects.create(
-        concept=concept, type="youtube_reference", title_fr="Cours", url=YOUTUBE_REF
-    )
+    ResourceLink.objects.create(concept=concept, type="youtube_reference", title_fr="Cours", url=YOUTUBE_REF)
     body = client.get(url("fr")).content.decode()
     assert "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" in body
 
 
 def test_book_sections_are_listed_not_embedded(client, concept):
     ResourceLink.objects.create(
-        concept=concept, type="book_section", title_fr="Chapitre 12", title_en="Chapter 12",
+        concept=concept,
+        type="book_section",
+        title_fr="Chapitre 12",
+        title_en="Chapter 12",
         url="https://example.com/book#12",
     )
     fr = client.get(url("fr")).content.decode()
@@ -235,7 +241,9 @@ def test_compiled_css_contains_entrance_animation():
 
 def test_query_count_is_bounded(client, concept, chapter, django_assert_max_num_queries):
     for i in range(4):
-        ResourceLink.objects.create(concept=concept, type="book_section", title_fr=f"B{i}", url="https://e.com")
+        ResourceLink.objects.create(
+            concept=concept, type="book_section", title_fr=f"B{i}", url="https://e.com"
+        )
     Concept.objects.create(chapter=chapter, title_fr="Suivant", slug="next", order=2)
     with django_assert_max_num_queries(6):
         client.get(url("fr"))

@@ -5,7 +5,7 @@ from django.urls import include, path
 from django.views.i18n import set_language
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     # Native Django language switcher (POST language=<code>&next=<url>). It rewrites
     # the language prefix of `next`, so users stay on the same page.
     path("i18n/setlang/", set_language, name="set_language"),
@@ -17,5 +17,6 @@ urlpatterns += i18n_patterns(
     prefix_default_language=True,
 )
 
-if settings.DEBUG:
+# Tied to the app being installed (development.py), not to DEBUG.
+if "django_browser_reload" in settings.INSTALLED_APPS:
     urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]

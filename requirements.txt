@@ -1,6 +1,7 @@
 # Production runtime (PythonAnywhere): kept minimal for the 500 MB quota.
-Django~=5.2.0
-django-unfold
-django-environ
-whitenoise
-Markdown
+# Pinned for reproducible deploys; bump deliberately and rerun the tests.
+Django==5.2.17
+django-unfold==0.108.0
+django-environ==0.14.0
+whitenoise==6.12.0
+Markdown==3.10.3

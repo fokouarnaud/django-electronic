@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # PythonAnywhere offers 3.10-3.13; test both ends.
+        python-version: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Migrations are up to date
+        run: python manage.py makemigrations --check --dry-run
+      - name: Tests (development settings) with coverage
+        run: pytest --cov --cov-fail-under=95
+      - name: Tests (production settings)
+        env:
+          DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-0123456789
+        run: |
+          python manage.py collectstatic --noinput --settings=config.settings.production
+          python manage.py check --deploy --fail-level ERROR --settings=config.settings.production
+          pytest --ds=config.settings.production -q

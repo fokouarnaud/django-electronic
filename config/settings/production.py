@@ -11,9 +11,7 @@ from .base import *  # noqa: F401,F403
 from .base import BASE_DIR, INSECURE_DEV_SECRET_KEY, SECRET_KEY, env
 
 if not SECRET_KEY or SECRET_KEY == INSECURE_DEV_SECRET_KEY or SECRET_KEY.startswith("django-insecure"):
-    raise ImproperlyConfigured(
-        "Set a real DJANGO_SECRET_KEY in the environment (or .env) for production."
-    )
+    raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY in the environment (or .env) for production.")
 
 DEBUG = False  # never driven by the environment
 

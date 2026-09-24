@@ -1,7 +1,9 @@
-# Local development: production packages + Tailwind build, .po compiler, tests.
+# Local development and CI: production packages + Tailwind build, .po compiler, tests, lint.
 -r requirements.txt
-django-tailwind
-polib
-pytest
-pytest-django
-django-browser-reload
+django-tailwind==4.5.0
+polib==1.2.0
+pytest==9.1.1
+pytest-django==4.14.0
+pytest-cov==7.1.0
+django-browser-reload==1.21.0
+ruff==0.16.8

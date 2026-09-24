@@ -9,7 +9,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import translation
 
-from apps.curriculum.models import Chapter, Concept, Flashcard, UserProgress
+from apps.curriculum.models import Chapter, Choice, Concept, Flashcard, UserProgress
 
 
 def complete_url(lang="fr", chapter="ac", concept="faraday"):
@@ -31,6 +31,14 @@ def content(db):
 @pytest.fixture
 def user(db):
     return get_user_model().objects.create_user("me", password="pw")
+
+
+def answerable_card(concept):
+    """A quiz question that can be answered (the quiz skips cards without a correct choice)."""
+    card = Flashcard.objects.create(concept=concept, question_text_fr="Q")
+    Choice.objects.create(flashcard=card, text_fr="oui", is_correct=True)
+    Choice.objects.create(flashcard=card, text_fr="non")
+    return card
 
 
 def post(client, **kwargs):
@@ -98,7 +106,10 @@ def test_completion_is_idempotent(client, content, user):
 def test_existing_progress_row_is_updated_not_duplicated(client, content, user):
     _ch, concepts = content
     UserProgress.objects.create(
-        user=user, concept=concepts[0], notes="mes notes", youtube_obs_embedded_url="https://youtu.be/abc123XYZ_-"
+        user=user,
+        concept=concepts[0],
+        notes="mes notes",
+        youtube_obs_embedded_url="https://youtu.be/abc123XYZ_-",
     )
     client.force_login(user)
     post(client)
@@ -201,7 +212,7 @@ def test_concept_page_shows_completed_state(client, content):
 
 # --- Quiz page hooks + client script ---------------------------------------
 def test_quiz_page_exposes_completion_hooks(client, content):
-    Flashcard.objects.create(concept=content[1][0], question_text_fr="Q")
+    answerable_card(content[1][0])
     body = client.get("/fr/chapters/ac/concepts/faraday/quiz/").content.decode()
     assert f'data-complete-url="{complete_url("fr")}"' in body
     assert "data-csrf=" in body
@@ -211,7 +222,7 @@ def test_quiz_page_exposes_completion_hooks(client, content):
 
 
 def test_quiz_page_knows_when_already_completed(client, content):
-    Flashcard.objects.create(concept=content[1][0], question_text_fr="Q")
+    answerable_card(content[1][0])
     post(client)
     body = client.get("/fr/chapters/ac/concepts/faraday/quiz/").content.decode()
     assert 'data-completed="true"' in body
@@ -219,7 +230,7 @@ def test_quiz_page_knows_when_already_completed(client, content):
 
 
 def test_quiz_metrics_show_viewer_totals(client, content):
-    Flashcard.objects.create(concept=content[1][0], question_text_fr="Q")
+    answerable_card(content[1][0])
     post(client)
     ctx = client.get("/fr/chapters/ac/concepts/faraday/quiz/").context
     assert ctx["stats"]["mastered"] == 1 and ctx["stats"]["total"] == 3

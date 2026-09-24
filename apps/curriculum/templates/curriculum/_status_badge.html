@@ -1,0 +1,6 @@
+{# Status pill. Expects `status` (draft|review|mastered) and `label` (translated). #}
+<span data-status="{{ status }}"
+      class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
+      {% if status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
+      {% elif status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
+      {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ label }}</span>

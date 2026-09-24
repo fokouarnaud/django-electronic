@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="mx-auto max-w-2xl" data-quiz data-total="{{ flashcards|length }}"
-     data-complete-url="{% url 'curriculum:complete' chapter.slug concept.slug %}"
+     data-complete-url="{{ concept.get_complete_url }}"
      data-csrf="{{ csrf_token }}"
      data-completed="{% if already_completed %}true{% else %}false{% endif %}">
 

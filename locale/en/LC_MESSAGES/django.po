@@ -237,3 +237,104 @@ msgstr ""
 #: apps/curriculum/templates/curriculum/quiz.html
 msgid "Couldn't save your progress. Please try again."
 msgstr ""
+
+msgid "Curriculum"
+msgstr ""
+
+msgid "slug"
+msgstr ""
+
+msgid "order"
+msgstr ""
+
+msgid "status"
+msgstr ""
+
+msgid "chapter"
+msgstr ""
+
+msgid "chapters"
+msgstr ""
+
+msgid "concept"
+msgstr ""
+
+msgid "concepts"
+msgstr ""
+
+msgid "type"
+msgstr ""
+
+msgid "URL"
+msgstr ""
+
+msgid "resource"
+msgstr ""
+
+msgid "resources"
+msgstr ""
+
+msgid "Enter a falstad.com simulation URL."
+msgstr ""
+
+msgid "Enter a YouTube video URL."
+msgstr ""
+
+msgid "user"
+msgstr ""
+
+msgid "completed at"
+msgstr ""
+
+msgid "notes"
+msgstr ""
+
+msgid "my video (YouTube URL)"
+msgstr ""
+
+msgid "progress entry"
+msgstr ""
+
+msgid "progress entries"
+msgstr ""
+
+msgid "difficulty"
+msgstr ""
+
+msgid "quiz question"
+msgstr ""
+
+msgid "quiz questions"
+msgstr ""
+
+msgid "answer choice"
+msgstr ""
+
+msgid "answer choices"
+msgstr ""
+
+msgid "Metadata & SEO"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "SEO"
+msgstr ""
+
+msgid "Add at least two answers."
+msgstr ""
+
+msgid "Mark at least one answer as correct."
+msgstr ""
+
+msgid "Page not found"
+msgstr ""
+
+msgid "This page doesn't exist or has moved."
+msgstr ""
+
+msgid ""
+"Learn and master electronics concepts: explanations, simulations, videos and"
+" quizzes."
+msgstr ""

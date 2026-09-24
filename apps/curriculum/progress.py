@@ -11,8 +11,9 @@ def completed_concept_ids(request):
     """IDs of concepts the current viewer has completed."""
     if request.user.is_authenticated:
         return set(
-            UserProgress.objects.filter(user=request.user, completed_at__isnull=False)
-            .values_list("concept_id", flat=True)
+            UserProgress.objects.filter(user=request.user, completed_at__isnull=False).values_list(
+                "concept_id", flat=True
+            )
         )
     return set(request.session.get(SESSION_KEY, []))
 

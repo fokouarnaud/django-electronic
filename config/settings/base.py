@@ -72,14 +72,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# SQLite for dev and the first deploy. Only the ORM is used (no raw SQL) so the
-# engine can be swapped for PostgreSQL later without code changes.
+# SQLite by default. Only the ORM is used (no raw SQL), so moving to PostgreSQL
+# is a configuration change: DATABASE_URL=postgres://user:pass@host:5432/name
+# (plus `pip install psycopg[binary]`).
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{(BASE_DIR / 'db.sqlite3').as_posix()}"),
 }
+
+# Admin mounted on a configurable path (a less guessable URL cuts automated login attempts).
+ADMIN_URL = env.str("DJANGO_ADMIN_URL", default="admin/")
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -118,3 +119,21 @@ UNFOLD = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- Logging ----------------------------------------------------------------
+# Everything goes to stderr, which PythonAnywhere collects in the web app's
+# error log. Without this, DEBUG=False swallows 500 tracebacks.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "plain": {"format": "{asctime} {levelname} {name}: {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "plain"},
+    },
+    "root": {"handlers": ["console"], "level": "WARNING"},
+    "loggers": {
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+    },
+}

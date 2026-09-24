@@ -7,7 +7,7 @@ plan gratuit de PythonAnywhere (**500 Mo**).
 
 - Django 5.2 LTS, SQLite (ORM uniquement, sans SQL brut : migration PostgreSQL possible plus tard)
 - Admin [django-unfold](https://unfoldadmin.com/), interface Tailwind CSS v4 en mode sombre
-- Développé en TDD : 140 tests `pytest`
+- Développé en TDD : 180 tests `pytest`, couverture ≥ 95 % (mesurée : 98 %), lint `ruff`, CI GitHub Actions
 
 ---
 
@@ -98,11 +98,18 @@ Si `msgfmt` est installé, `python manage.py compilemessages` est équivalent.
 La langue est portée par l'URL (`/fr/…`, `/en/…`). Le sélecteur de la barre de navigation utilise
 la vue native `set_language` (`/i18n/setlang/`) et vous garde sur la même page dans l'autre langue.
 
-### Tests
+### Tests, lint, couverture
 
 ```bash
 pytest -v                            # configuration de développement (config.settings.development)
+pytest --cov                         # + couverture (la CI exige au moins 95 %)
+ruff check . && ruff format --check . # lint + formatage (config dans pyproject.toml)
+python manage.py makemigrations --check --dry-run   # aucune migration oubliée
 ```
+
+La CI (`.github/workflows/ci.yml`) rejoue tout cela sous Python 3.10 et 3.13 (les bornes de
+PythonAnywhere), puis `collectstatic`, `check --deploy` et la suite complète **en réglages de
+production**. Toute nouvelle dépréciation Django 6.0 fait échouer les tests (`pytest.ini`).
 
 ### Simuler la production en local
 
@@ -139,15 +146,21 @@ d'environnement réelles restent prioritaires.
 | `DJANGO_ALLOWED_HOSTS` | hôtes supplémentaires, séparés par des virgules (ex. votre domaine) | vide |
 | `DJANGO_SSL_REDIRECT` | `1` pour rediriger HTTP vers HTTPS | `0` |
 | `DJANGO_HSTS_SECONDS` | durée HSTS (à activer une fois le HTTPS validé ; c'est irréversible côté navigateur) | `0` |
+| `DATABASE_URL` | base de données (ex. `postgres://user:mdp@hôte:5432/nom` + `pip install "psycopg[binary]"`) | SQLite `./db.sqlite3` |
+| `DJANGO_ADMIN_URL` | chemin de l'admin (un chemin moins prévisible limite les tentatives de connexion automatisées) | `admin/` |
 | `DJANGO_ENV_FILE` | chemin d'un autre fichier `.env` | `./.env` |
 
 Production : `DEBUG=False`, `ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com']`
 (+ variable ci-dessus), cookies de session et CSRF `Secure`, cookie de session `HttpOnly`,
 `X-Frame-Options: DENY`, `nosniff`, en-tête proxy `X-Forwarded-Proto` reconnu, WhiteNoise
-(`CompressedManifestStaticFilesStorage`) placé juste après `SecurityMiddleware`.
+(`CompressedManifestStaticFilesStorage`) placé juste après `SecurityMiddleware`, journalisation
+des erreurs sur la sortie d'erreur (visible dans l'*error log* de PythonAnywhere), pages `404` et
+`500` personnalisées (la 500 est autonome : ni base, ni fichiers statiques).
 
-Dépendances : `requirements.txt` (production, minimal : Django, unfold, django-environ,
-whitenoise, Markdown) et `requirements-dev.txt` (+ django-tailwind, polib, pytest…).
+Dépendances **épinglées** (`==`) pour des déploiements reproductibles : `requirements.txt`
+(production, minimal : Django, unfold, django-environ, whitenoise, Markdown) et
+`requirements-dev.txt` (+ django-tailwind, polib, pytest, pytest-cov, ruff…). Mettre à jour une
+version = modifier la ligne puis relancer la suite.
 
 ---
 
@@ -160,7 +173,7 @@ config/settings/    base / development / production
 theme/              gabarit de base + CSS Tailwind compilé (theme/static/css/dist/)
 locale/{fr,en}/     .po et .mo (versionnés)
 scripts/            compile_messages.py
-tests/              i18n, admin, accueil, quiz, concept, progression, production
+tests/              i18n, modèles, admin, saisie, accueil, pages, quiz, concept, progression, production
 ```
 
 | URL | Rôle |
@@ -237,7 +250,7 @@ path = "/home/VOTRE_USER/django-electronic"
 if path not in sys.path:
     sys.path.insert(0, path)
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.production"   # la clé secrète vient du .env
+os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.production"  # la clé secrète vient du .env
 
 from django.core.wsgi import get_wsgi_application  # noqa: E402
 

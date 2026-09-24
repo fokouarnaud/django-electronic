@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static curriculum_extras %}
 {% block title %}{{ concept.title }} · {% trans "Electronics Lab" %}{% endblock %}
+{% block description %}{{ concept.title }} · {{ chapter.title }}{% endblock %}
 
 {% block content %}
 <a href="{% url 'curriculum:home' %}" class="inline-flex items-center gap-1.5 rounded-md text-sm text-slate-400 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400">
@@ -11,11 +12,7 @@
     <p class="text-xs font-medium uppercase tracking-wider text-teal-400">{{ chapter.title }}</p>
     <div class="mt-1 flex flex-wrap items-center gap-3">
         <h1 class="text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl">{{ concept.title }}</h1>
-        <span data-status="{{ effective_status }}"
-              class="rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-              {% if effective_status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
-              {% elif effective_status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
-              {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ status_label }}</span>
+        {% include "curriculum/_status_badge.html" with status=effective_status label=status_label %}
     </div>
 </header>
 
@@ -70,11 +67,11 @@
         <section class="animate-rise rounded-2xl border border-slate-800 bg-slate-900/60 p-4 transition-[border-color] duration-200 ease-out hover:border-teal-500/40 motion-reduce:animate-none" style="animation-delay: 80ms">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-xs font-medium uppercase tracking-wider text-slate-500">{% trans "Simulation" %}{% if sim.title %} · <span class="normal-case tracking-normal text-slate-300">{{ sim.title }}</span>{% endif %}</h2>
-                <a href="{{ sim.open_url }}" target="_blank" rel="noopener noreferrer" class="shrink-0 rounded text-xs text-teal-400 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{% trans "Open full screen" %} <span aria-hidden="true">↗</span></a>
+                <a href="{{ sim.embed_url }}" target="_blank" rel="noopener noreferrer" class="shrink-0 rounded text-xs text-teal-400 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">{% trans "Open full screen" %} <span aria-hidden="true">↗</span></a>
             </div>
             {# Fixed aspect ratio + clipped wrapper: the frame fills it, so no stray scrollbars or page jump. #}
             <div data-embed-frame class="relative mt-3 aspect-[4/3] w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
-                <iframe src="{{ sim.src }}" title="{% trans 'Simulation' %}{% if sim.title %}: {{ sim.title }}{% endif %}"
+                <iframe src="{{ sim.embed_url }}" title="{% trans 'Simulation' %}{% if sim.title %}: {{ sim.title }}{% endif %}"
                         class="absolute inset-0 size-full border-0"
                         sandbox="allow-scripts allow-same-origin" loading="lazy"
                         referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -99,13 +96,13 @@
 
 {# ---------- Navigation flow ---------- #}
 <nav class="mt-8 flex flex-wrap items-center gap-3 animate-rise motion-reduce:animate-none" style="animation-delay: 160ms" aria-label="{% trans 'Concept navigation' %}">
-    <a href="{% url 'curriculum:quiz' chapter.slug concept.slug %}" data-magnetic
+    <a href="{{ concept.get_quiz_url }}" data-magnetic
        class="inline-flex items-center gap-2 rounded-xl bg-teal-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-[transform,background-color] duration-200 ease-out hover:bg-teal-300 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">
         {% trans "Take the quiz" %}
         {% if question_count %}<span class="rounded-md bg-slate-950/15 px-1.5 py-0.5 text-xs tabular-nums">{{ question_count }}</span>{% endif %}
     </a>
     {% if next_concept %}
-    <a href="{% url 'curriculum:concept_detail' next_concept.chapter.slug next_concept.slug %}" data-magnetic
+    <a href="{{ next_concept.get_absolute_url }}" data-magnetic
        class="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-5 py-2.5 text-sm font-medium text-slate-200 transition-[transform,border-color] duration-200 ease-out hover:border-teal-500/40 active:scale-[0.98] motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">
         {% trans "Next concept" %} <span aria-hidden="true">→</span>
     </a>

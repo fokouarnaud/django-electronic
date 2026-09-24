@@ -12,12 +12,25 @@ HOME = "curriculum:home"
 def content(db):
     ch1 = Chapter.objects.create(title_fr="Générateurs AC", title_en="AC Generators", slug="ac", order=1)
     ch2 = Chapter.objects.create(title_fr="Bobines", title_en="Coils", slug="coils", order=2)
-    Concept.objects.create(chapter=ch1, title_fr="Loi de Faraday", title_en="Faraday's Law",
-                           slug="faraday", order=1, status="mastered")
-    Concept.objects.create(chapter=ch1, title_fr="Bagues collectrices", title_en="Slip rings",
-                           slug="slip", order=2, status="review")
-    Concept.objects.create(chapter=ch1, title_fr="Bagues fendues", title_en="Split rings",
-                           slug="split", order=3, status="draft")
+    Concept.objects.create(
+        chapter=ch1,
+        title_fr="Loi de Faraday",
+        title_en="Faraday's Law",
+        slug="faraday",
+        order=1,
+        status="mastered",
+    )
+    Concept.objects.create(
+        chapter=ch1,
+        title_fr="Bagues collectrices",
+        title_en="Slip rings",
+        slug="slip",
+        order=2,
+        status="review",
+    )
+    Concept.objects.create(
+        chapter=ch1, title_fr="Bagues fendues", title_en="Split rings", slug="split", order=3, status="draft"
+    )
     return ch1, ch2
 
 
@@ -55,8 +68,15 @@ def test_labels_are_translated(client, content):
 
 def test_dark_shell_and_bento_classes(client, content):
     body = client.get(reverse(HOME)).content.decode()
-    for cls in ("bg-slate-950", "bg-slate-900/60", "border-slate-800", "hover:border-teal-500/40",
-                "hover:scale-[1.01]", "duration-200", "ease-out"):
+    for cls in (
+        "bg-slate-950",
+        "bg-slate-900/60",
+        "border-slate-800",
+        "hover:border-teal-500/40",
+        "hover:scale-[1.01]",
+        "duration-200",
+        "ease-out",
+    ):
         assert cls in body
 
 

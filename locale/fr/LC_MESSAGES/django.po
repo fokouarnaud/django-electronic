@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: electronics-lab 0.1\n"
@@ -236,3 +237,106 @@ msgstr "Concept maîtrisé"
 #: apps/curriculum/templates/curriculum/quiz.html
 msgid "Couldn't save your progress. Please try again."
 msgstr "Impossible d'enregistrer votre progression. Veuillez réessayer."
+
+msgid "Curriculum"
+msgstr "Programme"
+
+msgid "slug"
+msgstr "slug"
+
+msgid "order"
+msgstr "ordre"
+
+msgid "status"
+msgstr "statut"
+
+msgid "chapter"
+msgstr "chapitre"
+
+msgid "chapters"
+msgstr "chapitres"
+
+msgid "concept"
+msgstr "concept"
+
+msgid "concepts"
+msgstr "concepts"
+
+msgid "type"
+msgstr "type"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "resource"
+msgstr "ressource"
+
+msgid "resources"
+msgstr "ressources"
+
+msgid "Enter a falstad.com simulation URL."
+msgstr "Saisissez l'URL d'une simulation falstad.com."
+
+msgid "Enter a YouTube video URL."
+msgstr "Saisissez l'URL d'une vidéo YouTube."
+
+msgid "user"
+msgstr "utilisateur"
+
+msgid "completed at"
+msgstr "terminé le"
+
+msgid "notes"
+msgstr "notes"
+
+msgid "my video (YouTube URL)"
+msgstr "ma vidéo (URL YouTube)"
+
+msgid "progress entry"
+msgstr "progression"
+
+msgid "progress entries"
+msgstr "progressions"
+
+msgid "difficulty"
+msgstr "difficulté"
+
+msgid "quiz question"
+msgstr "question de quiz"
+
+msgid "quiz questions"
+msgstr "questions de quiz"
+
+msgid "answer choice"
+msgstr "choix de réponse"
+
+msgid "answer choices"
+msgstr "choix de réponse"
+
+msgid "Metadata & SEO"
+msgstr "Métadonnées et référencement"
+
+msgid "Configuration"
+msgstr "Configuration"
+
+msgid "SEO"
+msgstr "Référencement"
+
+msgid "Add at least two answers."
+msgstr "Ajoutez au moins deux réponses."
+
+msgid "Mark at least one answer as correct."
+msgstr "Cochez au moins une bonne réponse."
+
+msgid "Page not found"
+msgstr "Page introuvable"
+
+msgid "This page doesn't exist or has moved."
+msgstr "Cette page n'existe pas ou a été déplacée."
+
+msgid ""
+"Learn and master electronics concepts: explanations, simulations, videos and"
+" quizzes."
+msgstr ""
+"Apprenez et maîtrisez les concepts d'électronique : explications, "
+"simulations, vidéos et quiz."

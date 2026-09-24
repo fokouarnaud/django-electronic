@@ -28,3 +28,8 @@ plan.txt
 # n'a pas Node.js) : on committe le CSS compilé (theme/static/css/dist/) et on
 # construit uniquement en local avec `python manage.py tailwind build`.
 theme/static_src/node_modules/
+
+# Test artefacts
+.coverage
+htmlcov/
+.ruff_cache/

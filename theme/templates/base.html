@@ -1,10 +1,12 @@
-{% load i18n static %}<!DOCTYPE html>
+{% load i18n static theme_tags %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="dark">
     <title>{% block title %}{% trans "Electronics Lab" %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% trans "Learn and master electronics concepts: explanations, simulations, videos and quizzes." %}{% endblock %}">
+    {% hreflang_links %}
     {# Compiled + minified Tailwind (committed). Hashed/compressed by WhiteNoise in production. #}
     <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
 </head>
@@ -29,7 +31,8 @@
                 {% get_language_info_list for AVAILABLE_LANGS as languages %}
                 {% for language in languages %}
                 <option value="{{ language.code }}"{% if language.code == CURRENT_LANG %} selected{% endif %} class="bg-slate-900">
-                    {% if language.code == "fr" %}🇫🇷{% else %}🇬🇧{% endif %} {{ language.name_local|capfirst }}
+                    {# Language names, not flags: a flag stands for a country, not a language. #}
+                    {{ language.name_local|capfirst }}
                 </option>
                 {% endfor %}
             </select>

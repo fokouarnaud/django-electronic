@@ -7,7 +7,13 @@ template simply doesn't render an iframe (the link may still be shown as text).
 import re
 from urllib.parse import parse_qs, urlsplit
 
-YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"}
+YOUTUBE_HOSTS = {
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "youtube-nocookie.com",
+    "www.youtube-nocookie.com",
+}
 FALSTAD_HOSTS = {"falstad.com", "www.falstad.com"}
 _VIDEO_ID = re.compile(r"^[A-Za-z0-9_-]{6,15}$")
 
