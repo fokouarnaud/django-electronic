@@ -1,19 +1,30 @@
-"""Django settings for the electronics learning platform."""
+"""Settings shared by every environment. See development.py / production.py."""
 
 import os
 from pathlib import Path
 
+import environ
 from django.utils.translation import gettext_lazy as _
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# config/settings/base.py -> project root
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", "django-insecure-dev-only-change-me-in-production"
-)
-DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
-ALLOWED_HOSTS = [
-    h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h
-]
+env = environ.Env()
+
+# Load a local .env (git-ignored) if present. DJANGO_ENV_FILE lets tests and
+# deployments point somewhere else. Real environment variables always win.
+_env_file = Path(os.environ.get("DJANGO_ENV_FILE", BASE_DIR / ".env"))
+if _env_file.is_file():
+    environ.Env.read_env(_env_file)
+
+# Only a placeholder for local work: production.py refuses to start with it.
+INSECURE_DEV_SECRET_KEY = "django-insecure-dev-only-change-me-in-production"
+SECRET_KEY = env.str("DJANGO_SECRET_KEY", default=INSECURE_DEV_SECRET_KEY)
+
+# Safe default; development.py switches it on, production.py forces it off.
+DEBUG = False
+
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     # Unfold must come before django.contrib.admin.
@@ -24,13 +35,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "tailwind",
     "theme",
     "apps.curriculum",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise right after SecurityMiddleware: serves the collected static files.
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -40,10 +51,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-if DEBUG:
-    INSTALLED_APPS += ["django_browser_reload"]
-    MIDDLEWARE += ["django_browser_reload.middleware.BrowserReloadMiddleware"]
 
 ROOT_URLCONF = "config.urls"
 
@@ -65,7 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# SQLite for dev and first deploy. Only the ORM is used (no raw SQL) so the
+# SQLite for dev and the first deploy. Only the ORM is used (no raw SQL) so the
 # engine can be swapped for PostgreSQL later without code changes.
 DATABASES = {
     "default": {
@@ -83,7 +90,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # --- Internationalisation -------------------------------------------------
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 TIME_ZONE = "Europe/Paris"
 
@@ -96,24 +102,14 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 LANGUAGE_COOKIE_NAME = "django_language"
 
 # --- Static files ---------------------------------------------------------
+# The compiled, minified Tailwind CSS (theme/static/css/dist/) is committed and
+# served like any other static file: production never needs Node.js.
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {
-        "BACKEND": (
-            "django.contrib.staticfiles.storage.StaticFilesStorage"
-            if DEBUG
-            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        )
-    },
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
-
-# --- Tailwind (django-tailwind) -------------------------------------------
-# Compiled, minified CSS lives in theme/static/css/dist/ and is committed, so
-# production never needs Node.js.
-TAILWIND_APP_NAME = "theme"
-INTERNAL_IPS = ["127.0.0.1"]
 
 # --- Unfold admin ---------------------------------------------------------
 UNFOLD = {

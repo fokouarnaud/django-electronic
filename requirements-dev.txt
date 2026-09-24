@@ -1,4 +1,7 @@
+# Local development: production packages + Tailwind build, .po compiler, tests.
 -r requirements.txt
+django-tailwind
+polib
 pytest
 pytest-django
 django-browser-reload
