@@ -1,0 +1,46 @@
+{% load i18n static tailwind_tags %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>{% block title %}{% trans "Electronics Lab" %}{% endblock %}</title>
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-200 antialiased selection:bg-teal-400/30">
+{% get_current_language as CURRENT_LANG %}
+{% get_available_languages as AVAILABLE_LANGS %}
+<header class="sticky top-0 z-20 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+    <nav class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+        <a href="{% url 'curriculum:home' %}"
+           class="flex items-center gap-2 rounded-md font-semibold tracking-tight text-slate-100 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400">
+            <span class="grid size-7 place-items-center rounded-lg bg-cyan-500/10 text-teal-400 ring-1 ring-teal-500/30" aria-hidden="true">⚡</span>
+            {% trans "Electronics Lab" %}
+        </a>
+
+        <form action="{% url 'set_language' %}" method="post" class="relative">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label for="language" class="sr-only">{% trans "Language" %}</label>
+            {# Fixed width => no layout shift when the label changes between languages. #}
+            <select id="language" name="language" onchange="this.form.submit()"
+                    class="h-9 w-36 cursor-pointer appearance-none rounded-lg border border-slate-800 bg-slate-900/60 pl-3 pr-8 text-sm text-slate-200 transition-[border-color,background-color] duration-200 ease-out hover:border-teal-500/40 hover:bg-slate-900 focus-visible:border-teal-500/60 focus-visible:outline-none">
+                {% get_language_info_list for AVAILABLE_LANGS as languages %}
+                {% for language in languages %}
+                <option value="{{ language.code }}"{% if language.code == CURRENT_LANG %} selected{% endif %} class="bg-slate-900">
+                    {% if language.code == "fr" %}🇫🇷{% else %}🇬🇧{% endif %} {{ language.name_local|capfirst }}
+                </option>
+                {% endfor %}
+            </select>
+            <svg class="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+            <noscript><button type="submit" class="ml-2 text-sm text-teal-400 underline">{% trans "Apply" %}</button></noscript>
+        </form>
+    </nav>
+</header>
+
+<main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+    {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

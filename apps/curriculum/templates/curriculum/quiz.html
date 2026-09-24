@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{{ concept.title }} · {% trans "Quiz" %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl" data-quiz data-total="{{ flashcards|length }}">
+
+    <a href="{% url 'curriculum:home' %}" class="inline-flex items-center gap-1.5 rounded-md text-sm text-slate-400 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400">
+        <span aria-hidden="true">←</span> {% trans "Back to chapters" %}
+    </a>
+
+    <header class="mt-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-teal-400">{{ chapter.title }} · {% trans "Quiz" %}</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl">{{ concept.title }}</h1>
+    </header>
+
+    {% if flashcards %}
+    {# Score + progress: updated by quiz.js #}
+    <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+        <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-400">{% trans "Score" %}</span>
+            <span class="tabular-nums text-slate-100"><span data-score class="text-teal-400">0</span>/{{ flashcards|length }}</span>
+        </div>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800">
+            <div data-progress class="h-full w-full origin-left scale-x-0 rounded-full bg-teal-400 transition-transform duration-200 ease-out motion-reduce:transition-none"></div>
+        </div>
+    </div>
+
+    <ol class="mt-6 space-y-6">
+        {% for card in flashcards %}
+        <li>
+            <section data-question class="group rounded-2xl border border-slate-800 bg-slate-900/60 p-5 sm:p-6">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    {% blocktrans with n=forloop.counter total=flashcards|length %}Question {{ n }} of {{ total }}{% endblocktrans %}
+                </p>
+                <h2 class="mt-2 text-lg font-medium leading-snug text-slate-100">{{ card.question_text }}</h2>
+
+                <div class="mt-5 grid gap-3" role="group" aria-label="{% trans 'Answers' %}">
+                    {% for choice in card.choices.all %}
+                    <button type="button" data-choice data-correct="{% if choice.is_correct %}true{% else %}false{% endif %}" data-state="idle"
+                            class="flex w-full items-center gap-3 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-left text-sm text-slate-200
+                                   transition-[transform,border-color,background-color,opacity] duration-200 ease-out motion-reduce:transition-none
+                                   hover:border-teal-500/40 hover:bg-slate-800/60 active:scale-[0.98]
+                                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400
+                                   disabled:cursor-default disabled:hover:border-slate-800 disabled:hover:bg-slate-900 disabled:active:scale-100
+                                   data-[state=correct]:border-emerald-500/60 data-[state=correct]:bg-emerald-500/10 data-[state=correct]:text-emerald-100
+                                   data-[state=wrong]:border-rose-500/60 data-[state=wrong]:bg-rose-500/10 data-[state=wrong]:text-rose-100
+                                   data-[state=reveal]:border-emerald-500/40 data-[state=reveal]:bg-emerald-500/5
+                                   data-[state=dimmed]:opacity-50">
+                        <span class="grid size-6 shrink-0 place-items-center rounded-md bg-cyan-500/10 text-xs font-medium tabular-nums text-teal-400 ring-1 ring-inset ring-teal-500/20" aria-hidden="true">{{ forloop.counter }}</span>
+                        <span>{{ choice.text }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+
+                {# Fades in and grows (grid-rows 0fr -> 1fr) so following content moves smoothly. #}
+                <div data-explanation inert
+                     class="grid grid-rows-[0fr] opacity-0 transition-[grid-template-rows,opacity] duration-250 ease-out motion-reduce:transition-none
+                            group-data-[answered=true]:grid-rows-[1fr] group-data-[answered=true]:opacity-100">
+                    <div class="overflow-hidden">
+                        <div class="mt-5 border-t border-slate-800 pt-4" aria-live="polite">
+                            <p class="hidden text-sm font-medium text-emerald-300 group-data-[result=correct]:block">{% trans "Correct!" %}</p>
+                            <p class="hidden text-sm font-medium text-rose-300 group-data-[result=wrong]:block">{% trans "Not quite" %}</p>
+                            {% if card.explanation %}
+                            <h3 class="mt-3 text-xs font-medium uppercase tracking-wider text-slate-500">{% trans "Explanation" %}</h3>
+                            <p class="mt-1 text-sm leading-relaxed text-slate-300">{{ card.explanation }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </li>
+        {% endfor %}
+    </ol>
+
+    <div class="mt-6 flex justify-end">
+        <button type="button" data-retry
+                class="rounded-lg bg-cyan-500/10 px-3 py-1.5 text-sm font-medium text-teal-400 ring-1 ring-inset ring-teal-500/20 transition-colors duration-200 ease-out hover:bg-cyan-500/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-400">
+            {% trans "Retry" %}
+        </button>
+    </div>
+    {% else %}
+    <p class="mt-8 rounded-2xl border border-dashed border-slate-800 p-8 text-slate-500">{% trans "No questions yet." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'curriculum/quiz.js' %}" defer></script>
+{% endblock %}

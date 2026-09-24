@@ -1,0 +1,190 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: electronics-lab 0.1\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: config/settings.py
+msgid "French"
+msgstr "Français"
+
+#: config/settings.py
+msgid "English"
+msgstr "Anglais"
+
+#: config/settings.py theme/templates/base.html
+msgid "Electronics Lab"
+msgstr "Labo d'électronique"
+
+#: theme/templates/base.html
+msgid "Language"
+msgstr "Langue"
+
+#: theme/templates/base.html
+msgid "Apply"
+msgstr "Appliquer"
+
+#: curriculum/templates/curriculum/home.html
+msgid "Chapters"
+msgstr "Chapitres"
+
+#: curriculum/templates/curriculum/home.html
+msgid "No chapters yet."
+msgstr "Aucun chapitre pour le moment."
+
+#: curriculum/models.py
+msgid "title (French)"
+msgstr "titre (français)"
+
+#: curriculum/models.py
+msgid "title (English)"
+msgstr "titre (anglais)"
+
+#: curriculum/models.py
+msgid "description (French)"
+msgstr "description (français)"
+
+#: curriculum/models.py
+msgid "description (English)"
+msgstr "description (anglais)"
+
+#: curriculum/models.py
+msgid "explanation (French, Markdown)"
+msgstr "explication (français, Markdown)"
+
+#: curriculum/models.py
+msgid "explanation (English, Markdown)"
+msgstr "explication (anglais, Markdown)"
+
+#: curriculum/models.py
+msgid "Draft"
+msgstr "Brouillon"
+
+#: curriculum/models.py
+msgid "In review"
+msgstr "En révision"
+
+#: curriculum/models.py
+msgid "Mastered"
+msgstr "Maîtrisé"
+
+#: curriculum/models.py
+msgid "Book section"
+msgstr "Section de livre"
+
+#: curriculum/models.py
+msgid "YouTube reference"
+msgstr "Référence YouTube"
+
+#: curriculum/models.py
+msgid "Falstad simulation"
+msgstr "Simulation Falstad"
+
+#: curriculum/models.py
+msgid "question (French)"
+msgstr "question (français)"
+
+#: curriculum/models.py
+msgid "question (English)"
+msgstr "question (anglais)"
+
+#: curriculum/models.py
+msgid "explanation (French)"
+msgstr "explication (français)"
+
+#: curriculum/models.py
+msgid "explanation (English)"
+msgstr "explication (anglais)"
+
+#: curriculum/models.py
+msgid "Easy"
+msgstr "Facile"
+
+#: curriculum/models.py
+msgid "Medium"
+msgstr "Moyen"
+
+#: curriculum/models.py
+msgid "Hard"
+msgstr "Difficile"
+
+#: curriculum/templates/curriculum/home.html
+msgid "Statistics"
+msgstr "Statistiques"
+
+#: curriculum/templates/curriculum/home.html
+msgid "Progress"
+msgstr "Progression"
+
+#: curriculum/templates/curriculum/home.html
+msgid "Start"
+msgstr "Commencer"
+
+#: curriculum/templates/curriculum/home.html
+msgid "Concepts"
+msgstr "Concepts"
+
+#: curriculum/templates/curriculum/home.html
+msgid "No concepts yet."
+msgstr "Aucun concept pour le moment."
+
+#: curriculum/templates/curriculum/home.html
+#, python-format
+msgid "Chapter %(n)s"
+msgstr "Chapitre %(n)s"
+
+#: apps/curriculum/models.py
+msgid "answer (French)"
+msgstr "réponse (français)"
+
+#: apps/curriculum/models.py
+msgid "answer (English)"
+msgstr "réponse (anglais)"
+
+#: apps/curriculum/models.py
+msgid "correct answer"
+msgstr "bonne réponse"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Quiz"
+msgstr "Quiz"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Back to chapters"
+msgstr "Retour aux chapitres"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Score"
+msgstr "Score"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Answers"
+msgstr "Réponses"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Correct!"
+msgstr "Bonne réponse !"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Not quite"
+msgstr "Pas tout à fait"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Explanation"
+msgstr "Explication"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Retry"
+msgstr "Recommencer"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "No questions yet."
+msgstr "Aucune question pour le moment."
+
+#: apps/curriculum/templates/curriculum/quiz.html
+#, python-format
+msgid "Question %(n)s of %(total)s"
+msgstr "Question %(n)s sur %(total)s"
