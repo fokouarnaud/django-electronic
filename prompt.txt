@@ -55,3 +55,10 @@ Create a modular Django app named 'curriculum' with the following database schem
 - Write the JavaScript logic for instant feedback when answering a quiz question, using fluid, hardware-accelerated micro-interactions.
 
 Execute STEP 1 first, then show me the project tree and the passing test suites before moving forward.
+
+ ● Model translation approach for title/description/clear_text_explanation?
+   → Explicit _fr/_en columns + helper (Recommended)
+ │ ● Compiled .mo files and Tailwind CSS: how should they reach PythonAnywhere (no Node, and gettext may be missing here)?
+   → Commit both compiled outputs (Recommended)
+ │ ● Python version target? Local is 3.14, PythonAnywhere free tier typically offers 3.10–3.13.
+   → Develop on 3.13-compatible code (Recommended)
