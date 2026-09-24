@@ -3,7 +3,10 @@
 {% block title %}{{ concept.title }} · {% trans "Quiz" %}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-2xl" data-quiz data-total="{{ flashcards|length }}">
+<div class="mx-auto max-w-2xl" data-quiz data-total="{{ flashcards|length }}"
+     data-complete-url="{% url 'curriculum:complete' chapter.slug concept.slug %}"
+     data-csrf="{{ csrf_token }}"
+     data-completed="{% if already_completed %}true{% else %}false{% endif %}">
 
     <a href="{% url 'curriculum:home' %}" class="inline-flex items-center gap-1.5 rounded-md text-sm text-slate-400 transition-colors duration-200 ease-out hover:text-teal-400 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400">
         <span aria-hidden="true">←</span> {% trans "Back to chapters" %}
@@ -24,6 +27,17 @@
         <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800">
             <div data-progress class="h-full w-full origin-left scale-x-0 rounded-full bg-teal-400 transition-transform duration-200 ease-out motion-reduce:transition-none"></div>
         </div>
+        {# Live metrics: incremented by quiz.js when the concept is completed (no reload). #}
+        <div class="mt-4 flex items-center justify-between gap-3 border-t border-slate-800 pt-3 text-sm">
+            <span class="text-slate-400">{% trans "Concepts mastered" %}
+                <span class="ml-1 tabular-nums text-slate-100">
+                    <span data-mastered-count data-pulse="false" class="inline-block text-emerald-300 transition-[transform,color] duration-200 ease-out data-[pulse=true]:scale-125 data-[pulse=true]:text-emerald-200 motion-reduce:transition-none">{{ stats.mastered }}</span> / <span data-mastered-total>{{ stats.total }}</span>
+                </span>
+            </span>
+            <span data-mastered-chip data-show="{% if already_completed %}true{% else %}false{% endif %}"
+                  class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-300 opacity-0 ring-1 ring-inset ring-emerald-500/20 transition-opacity duration-200 ease-out data-[show=true]:opacity-100 motion-reduce:transition-none">✓ {% trans "Concept mastered" %}</span>
+        </div>
+        <p data-save-error hidden class="mt-3 text-xs text-rose-300" role="status">{% trans "Couldn't save your progress. Please try again." %}</p>
     </div>
 
     <ol class="mt-6 space-y-6">

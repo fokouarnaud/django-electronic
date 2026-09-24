@@ -1,9 +1,24 @@
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 from django.views.generic import TemplateView
 
 from .embeds import falstad_embed_url, youtube_embed_url
 from .models import Chapter, Concept, Flashcard, ResourceLink, UserProgress
+from .progress import (
+    SESSION_KEY,
+    completed_concept_ids,
+    compute_stats,
+    effective_status,
+    mark_completed,
+)
+
+
+def viewer_stats(request):
+    """Stats over every concept for the current viewer (2 queries + progress lookup)."""
+    concepts = Concept.objects.only("id", "status")
+    return compute_stats(concepts, completed_concept_ids(request))
 
 
 class HomeView(TemplateView):
@@ -11,31 +26,28 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Two queries total (chapters + prefetched concepts); stats are computed
-        # in Python from the prefetched rows so the count stays constant.
+        completed = completed_concept_ids(self.request)
+        # Chapters + prefetched concepts = 2 queries; everything else is computed in Python.
         chapters = list(Chapter.objects.prefetch_related("concepts"))
-        counts = {status.value: 0 for status in Concept.Status}
+        all_concepts = []
         for chapter in chapters:
             concepts = list(chapter.concepts.all())
+            for concept in concepts:
+                status = effective_status(concept, completed)
+                concept.effective_status = status.value
+                concept.status_label = status.label
+                concept.is_mastered = status == Concept.Status.MASTERED
             chapter.first_concept = concepts[0] if concepts else None
             chapter.total_count = len(concepts)
-            chapter.mastered_count = sum(c.status == Concept.Status.MASTERED for c in concepts)
+            chapter.mastered_count = sum(c.is_mastered for c in concepts)
             chapter.percent = (
                 round(100 * chapter.mastered_count / chapter.total_count)
                 if chapter.total_count
                 else 0
             )
-            for concept in concepts:
-                counts[concept.status] += 1
-        total = sum(counts.values())
+            all_concepts.extend(concepts)
         context["chapters"] = chapters
-        context["stats"] = {
-            "total": total,
-            "mastered": counts["mastered"],
-            "review": counts["review"],
-            "draft": counts["draft"],
-            "percent": round(100 * counts["mastered"] / total) if total else 0,
-        }
+        context["stats"] = compute_stats(all_concepts, completed)
         return context
 
 
@@ -55,7 +67,14 @@ class QuizView(TemplateView):
             # Choices ordered by Meta.ordering; one extra query for all cards.
             "choices"
         )
-        context.update(concept=concept, chapter=concept.chapter, flashcards=list(flashcards))
+        completed = completed_concept_ids(self.request)
+        context.update(
+            concept=concept,
+            chapter=concept.chapter,
+            flashcards=list(flashcards),
+            stats=compute_stats(Concept.objects.only("id", "status"), completed),
+            already_completed=concept.id in completed,
+        )
         return context
 
 
@@ -81,11 +100,18 @@ class ConceptDetailView(TemplateView):
                 if embed:  # untrusted hosts are silently not embedded
                     simulations.append({"title": link.title, "src": embed, "open_url": embed})
 
-        # The user's own OBS video (private to them) wins over reference videos.
-        own_video = None
-        if self.request.user.is_authenticated:
-            progress = UserProgress.objects.filter(user=self.request.user, concept=concept).first()
-            own_video = youtube_embed_url(progress.youtube_obs_embedded_url) if progress else None
+        # One progress lookup serves both the private OBS video and the completed state.
+        request = self.request
+        own_video, completed = None, False
+        if request.user.is_authenticated:
+            progress = UserProgress.objects.filter(user=request.user, concept=concept).first()
+            if progress:
+                own_video = youtube_embed_url(progress.youtube_obs_embedded_url)
+                completed = progress.completed_at is not None
+        else:
+            completed = concept.id in request.session.get(SESSION_KEY, [])
+        status = effective_status(concept, {concept.id} if completed else set())
+
         reference_videos = [
             {"title": link.title, "src": src}
             for link in resources
@@ -115,6 +141,8 @@ class ConceptDetailView(TemplateView):
         context.update(
             concept=concept,
             chapter=chapter,
+            effective_status=status.value,
+            status_label=status.label,
             book_sections=[r for r in resources if r.type == ResourceLink.Type.BOOK_SECTION],
             simulations=simulations,
             video=video,
@@ -122,3 +150,17 @@ class ConceptDetailView(TemplateView):
             next_concept=next_concept,
         )
         return context
+
+
+@require_POST
+def complete_concept(request, chapter_slug, concept_slug):
+    """Log a finished quiz (called with fetch() from quiz.js; CSRF-protected).
+
+    Signed-in users get a UserProgress row; anonymous visitors fall back to the
+    session. Returns the viewer's fresh stats so the UI can update without reload.
+    """
+    concept = get_object_or_404(Concept, slug=concept_slug, chapter__slug=chapter_slug)
+    mark_completed(request, concept)
+    return JsonResponse(
+        {"completed": True, "concept": concept.slug, "stats": viewer_stats(request)}
+    )

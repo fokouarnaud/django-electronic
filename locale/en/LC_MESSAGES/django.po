@@ -225,3 +225,15 @@ msgstr ""
 #: apps/curriculum/templates/curriculum/concept_detail.html
 msgid "Next concept"
 msgstr ""
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Concepts mastered"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Concept mastered"
+msgstr ""
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Couldn't save your progress. Please try again."
+msgstr ""

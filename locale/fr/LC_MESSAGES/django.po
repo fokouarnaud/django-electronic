@@ -224,3 +224,15 @@ msgstr "Passer le quiz"
 #: apps/curriculum/templates/curriculum/concept_detail.html
 msgid "Next concept"
 msgstr "Concept suivant"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Concepts mastered"
+msgstr "Concepts maîtrisés"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Concept mastered"
+msgstr "Concept maîtrisé"
+
+#: apps/curriculum/templates/curriculum/quiz.html
+msgid "Couldn't save your progress. Please try again."
+msgstr "Impossible d'enregistrer votre progression. Veuillez réessayer."

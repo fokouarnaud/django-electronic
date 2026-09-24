@@ -11,11 +11,11 @@
     <p class="text-xs font-medium uppercase tracking-wider text-teal-400">{{ chapter.title }}</p>
     <div class="mt-1 flex flex-wrap items-center gap-3">
         <h1 class="text-2xl font-semibold tracking-tight text-slate-100 sm:text-3xl">{{ concept.title }}</h1>
-        <span data-status="{{ concept.status }}"
+        <span data-status="{{ effective_status }}"
               class="rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset
-              {% if concept.status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
-              {% elif concept.status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
-              {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ concept.get_status_display }}</span>
+              {% if effective_status == 'mastered' %}bg-emerald-500/10 text-emerald-300 ring-emerald-500/20
+              {% elif effective_status == 'review' %}bg-amber-500/10 text-amber-300 ring-amber-500/20
+              {% else %}bg-slate-500/10 text-slate-400 ring-slate-500/20{% endif %}">{{ status_label }}</span>
     </div>
 </header>
 

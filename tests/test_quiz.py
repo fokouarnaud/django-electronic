@@ -137,7 +137,8 @@ def test_query_count_is_constant(client, card, django_assert_max_num_queries):
     for i in range(3):
         extra = Flashcard.objects.create(concept=card.concept, question_text_fr=f"Q{i}")
         Choice.objects.create(flashcard=extra, text_fr="a", is_correct=True)
-    with django_assert_max_num_queries(3):
+    # concept + flashcards + choices + viewer stats: constant, however many cards exist.
+    with django_assert_max_num_queries(4):
         client.get(quiz_url("fr"))
 
 

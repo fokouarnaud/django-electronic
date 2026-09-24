@@ -16,4 +16,9 @@ urlpatterns = [
         views.QuizView.as_view(),
         name="quiz",
     ),
+    path(
+        "chapters/<slug:chapter_slug>/concepts/<slug:concept_slug>/complete/",
+        views.complete_concept,
+        name="complete",
+    ),
 ]
