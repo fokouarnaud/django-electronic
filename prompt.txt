@@ -1,0 +1,57 @@
+Act as a Senior Python/Django Full-Stack Engineer and UX Designer. We are building a "Brilliant-style" educational platform for logging and masterizing electronics concepts (starting with AC Generators, Faraday's Law, slip/split rings, and wave patterns). The platform must be fully bilingual (French and English) with a dynamic language switcher in the UI.
+
+### 🛠 CRITICAL TECHNICAL & STORAGE CONSTRAINTS (500MB PythonAnywhere)
+1. Environment: PythonAnywhere Free Tier (Strict 500MB storage limit).
+2. Stack: Django 5+, SQLite (Local dev and initial deploy), clean JS/CSS.
+3. Database Portability: Strictly use Django ORM without raw SQL to allow a flawless future migration to PostgreSQL.
+4. Testing: 100% Test-Driven Development (TDD) for core logic.
+5. Tailwind Production Strategy: Use 'django-tailwind' for local development. Configure production to ONLY serve the compiled, minified CSS file. DO NOT install Node.js/npm or include 'node_modules' on PythonAnywhere to save ~200MB.
+
+### 🌐 INTERNATIONALIZATION (i18n) & LOCALIZATION (l10n)
+- Enable Django's translation framework inside 'settings.py' (USE_I18N = True).
+- Supported languages: French ('fr') and English ('en'). Default language is French ('fr').
+- Configure 'LocaleMiddleware' correctly right after 'SessionMiddleware' and 'CommonMiddleware'.
+- Implement model translation for dynamic content. Dynamic fields (title, description, clear_text_explanation) must support both languages without breaking SQLite constraints. Use standard Django translation patterns or a lightweight translation field approach.
+- Create a dedicated view/URL ('set_language') or use Django's native i18n view to let users switch languages instantly via a dropdown menu in the navbar.
+- Wrap all hardcoded strings in templates and Python files with translation tags ({% trans %}, {% blocktrans %}, _()).
+
+### 🧠 REQUIRED AGENT SKILLS ACTIVATION
+- Use your [test-driven-development] skill: Write unit tests BEFORE writing any view, model translation, or language switcher logic.
+- Use your [grill-me] skill: If an architectural choice impacts performance or storage limits, stop and ask me specific multi-choice or direct questions.
+- Use your [ui-ux-pro-max] skill: Design a clean Bento-grid layout with a solid color system (anti-AI slop). Integrate 'django-unfold' for the admin dashboard. Unfold must be placed at the top of INSTALLED_APPS. All admin models must inherit from 'unfold.admin.ModelAdmin'.
+- Use your [emil-skill]: Prepare the frontend UI for micro-interactions and smooth transitions (under 300ms, ease-out), specifically for the language dropdown toggle, quiz choices feedback, and Falstad iframe containers.
+
+### 📐 APP ARCHITECTURE & MODELS
+Create a modular Django app named 'curriculum' with the following database schema (supporting bilingual content):
+- Chapter: title (translatable), slug, order, description (translatable).
+- Concept: chapter (FK), title (translatable), slug, order, clear_text_explanation (translatable, Markdown supported), status (draft, review, mastered).
+- ResourceLink: concept (FK), type (choices: 'book_section', 'youtube_reference', 'falstad_simulation'), title (translatable), url.
+- UserProgress: user (FK), concept (FK), completed_at, notes, youtube_obs_embedded_url (to log my own video explanation).
+- Flashcard/Quiz: concept (FK), question_text (translatable), explanation (translatable), difficulty.
+
+### 🎨 STEP-BY-STEP IMPLEMENTATION PLAN
+
+#### STEP 1: Foundation, i18n & TDD Setup
+- Initialize the Django project settings. Enable i18n, middleware, and language arrays.
+- Configure 'django-tailwind' inside a dedicated 'theme' app and 'django-unfold' for the admin panel.
+- Write failing tests in 'tests/test_i18n.py' verifying that changing the language session/cookie updates the view context from French to English.
+- Implement basic models and views to pass these tests. Generate the initial locale (.po) files structure.
+
+#### STEP 2: The Unfold Admin Power-User Layout
+- Register models using Unfold ModelAdmin.
+- Ensure the admin forms display bilingual fields cleanly (e.g., fields for both English and French titles/descriptions stacked logically).
+- Enable inline editing for ResourceLinks and Quizzes inside the Concept view.
+
+#### STEP 3: Frontend Architecture (Bento Grid + Language Switcher)
+- Create a modern dashboard layout (Bento Grid structure) showcasing Chapters -> Concepts.
+- Build the Navbar containing a clean, animated language selector dropdown (handled via [emil-skill] CSS transitions).
+- Embed custom component containers for:
+  1. The Earl Boysen book review notes section (translated according to active locale).
+  2. The Falstad Simulator container (responsive Iframe wrapper).
+  3. The YouTube embed player showing my own breakdown videos recorded via OBS.
+
+#### STEP 4: Interactive Quiz Engine
+- Build the view and template for concept self-evaluation.
+- Write the JavaScript logic for instant feedback when answering a quiz question, using fluid, hardware-accelerated micro-interactions.
+
+Execute STEP 1 first, then show me the project tree and the passing test suites before moving forward.

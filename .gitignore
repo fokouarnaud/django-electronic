@@ -21,6 +21,7 @@ db.sqlite3-journal
 media/
 staticfiles/
 .env
+.prompt.txt
 
 # django-tailwind (Node) — node_modules est lourd et inutile en prod (PythonAnywhere
 # n'a pas Node.js) : on committe le CSS compilé (theme/static/css/dist/) et on
