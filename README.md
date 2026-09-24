@@ -50,22 +50,63 @@ simulation ou de vidéo est ignorée, jamais affichée.
 
 ## Démarrage en local
 
-Prérequis : Python 3.10 – 3.13 (le code reste compatible avec PythonAnywhere). **Node.js n'est pas
-nécessaire** : Tailwind s'exécute via le binaire autonome.
+Prérequis : **Python 3.10 à 3.13** (mêmes versions que PythonAnywhere) et git. **Ni Node.js ni
+gettext** : le CSS Tailwind compilé et les traductions `.mo` sont déjà dans le dépôt.
+
+### 1. Récupérer le code et installer
 
 ```bash
-git clone <url-du-depot> django-electronic && cd django-electronic
-python -m venv .venv
-source .venv/bin/activate            # Windows PowerShell : .venv\Scripts\Activate.ps1
-pip install -r requirements-dev.txt
+git clone https://github.com/fokouarnaud/django-electronic.git
+cd django-electronic
 
-cp .env.example .env                 # puis renseigner DJANGO_SECRET_KEY (facultatif en dev)
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver           # http://127.0.0.1:8000/  ->  /fr/
+python -m venv .venv
+source .venv/bin/activate            # Linux / macOS
+# source .venv/Scripts/activate      # Windows, Git Bash
+# .venv\Scripts\Activate.ps1         # Windows, PowerShell
+
+pip install -r requirements-dev.txt  # production + outils (Tailwind, polib, pytest, ruff)
 ```
 
-`manage.py` utilise `config.settings.development` par défaut (DEBUG activé, rechargement du navigateur).
+> **Windows** : si `pip install` échoue avec `No such file or directory … Long Path support`,
+> le chemin du dossier est trop long (certains fichiers d'Unfold dépassent la limite de 260
+> caractères). Clonez dans un chemin court (ex. `C:\dev\django-electronic`) ou activez les
+> chemins longs de Windows.
+
+### 2. Configurer (facultatif en local)
+
+```bash
+cp .env.example .env                 # Windows PowerShell : Copy-Item .env.example .env
+```
+
+Sans `.env`, le projet démarre avec une clé de développement et une base SQLite `db.sqlite3`
+créée à la racine. Le `.env` ne sert en local que si vous voulez fixer votre propre clé ou une
+autre base (`DATABASE_URL`) — voir [Configuration](#configuration--réglages-séparés--variables-denvironnement).
+
+### 3. Créer la base et un compte administrateur
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser     # identifiant + mot de passe pour /admin/
+```
+
+### 4. Lancer
+
+```bash
+python manage.py runserver
+```
+
+| Adresse | Contenu |
+|---|---|
+| <http://127.0.0.1:8000/> | redirige vers `/fr/` (tableau de bord) |
+| <http://127.0.0.1:8000/en/> | version anglaise |
+| <http://127.0.0.1:8000/admin/> | admin Unfold : créez un chapitre, des concepts, des questions |
+
+La base est vide au départ : ajoutez un chapitre et ses concepts dans l'admin pour voir le
+tableau de bord se remplir. `manage.py` utilise `config.settings.development` (DEBUG activé,
+rechargement automatique du navigateur).
+
+Vous ne modifiez que des gabarits HTML ? Lancez en parallèle `python manage.py tailwind start`
+pour recompiler le CSS à chaque changement de classes (voir ci-dessous).
 
 ### Compiler le CSS Tailwind (binaire autonome, sans Node)
 
@@ -199,48 +240,86 @@ Progression : utilisateurs connectés → table `UserProgress` ; visiteurs anony
 
 ## Déploiement sur PythonAnywhere (plan gratuit)
 
-Avant de pousser, en local : `python manage.py tailwind build`, `python scripts/compile_messages.py`,
-`pytest`, puis committez **le CSS compilé et les fichiers `.mo`**.
+Le serveur ne fait **que** `git pull`, `pip install`, `migrate`, `collectstatic` : pas de Node.js,
+pas de gettext, pas de compilation.
+
+### 0. Avant de déployer (sur votre machine)
+
+Le travail se fait sur `develop` ; **`main` est la branche déployée** (celle que le serveur clone
+et met à jour).
 
 ```bash
-# ─── 1. Console Bash PythonAnywhere ────────────────────────────────────────────
-cd ~
-git clone <url-du-depot> django-electronic     # le CSS Tailwind compilé et les .mo sont déjà commités :
-cd django-electronic                           #   ni Node.js, ni npm, ni gettext à installer ici
+git checkout develop
+python manage.py tailwind build      # si des classes CSS ont changé
+python scripts/compile_messages.py   # si des traductions .po ont changé
+pytest                               # tout doit être vert
+git add -A && git commit -m "…"      # CSS compilé et .mo inclus
 
-# ─── 2. virtualenv (Python 3.10 – 3.13, selon ce que propose PythonAnywhere) ────
-mkvirtualenv --python=/usr/bin/python3.12 electronics     # s'active automatiquement
-pip install -r requirements.txt                           # production uniquement (~60 Mo)
-# plus tard : workon electronics
-
-# ─── 3. Secrets : fichier .env (ignoré par git), lu par la console ET par le site ─
-cp .env.example .env
-python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
-nano .env                                      # DJANGO_SECRET_KEY=<la clé générée>
-chmod 600 .env
-
-# ─── 4. Base de données et fichiers statiques ──────────────────────────────────
-export DJANGO_SETTINGS_MODULE=config.settings.production
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py collectstatic --noinput       # CSS + JS hachés et compressés dans staticfiles/
-python manage.py check --deploy                # deux avertissements attendus : HSTS et redirection HTTPS
+git checkout main
+git merge develop                    # intègre le travail dans la branche déployée
+git push origin main develop          # publie les deux branches
+git checkout develop                 # on reprend le travail sur develop
 ```
 
-**Onglet *Web*** : *Add a new web app* → *Manual configuration* → même version de Python que le
-virtualenv, puis renseignez :
+### 1. Code et virtualenv (console **Bash** de PythonAnywhere)
+
+```bash
+cd ~
+git clone https://github.com/fokouarnaud/django-electronic.git     # branche main
+cd django-electronic
+
+mkvirtualenv --python=/usr/bin/python3.12 electronics    # 3.10 à 3.13 ; s'active tout seul
+pip install -r requirements.txt                          # production uniquement (~60 Mo)
+
+# Indispensable : sans cette variable, manage.py charge les réglages de développement,
+# qui exigent django-tailwind (non installé ici) -> « No module named 'tailwind' ».
+# Le hook postactivate la redéfinit à chaque `workon electronics`.
+echo 'export DJANGO_SETTINGS_MODULE=config.settings.production' \
+  >> ~/.virtualenvs/electronics/bin/postactivate
+workon electronics
+echo $DJANGO_SETTINGS_MODULE                             # doit afficher config.settings.production
+```
+
+### 2. Secrets : le fichier `.env`
+
+```bash
+cp .env.example .env
+python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
+nano .env            # remplacez change-me : DJANGO_SECRET_KEY=<la clé affichée>   (Ctrl+O, Entrée, Ctrl+X)
+chmod 600 .env       # lisible par vous seul
+```
+
+Générez une clé **propre au serveur** (pas celle de votre machine). Le domaine
+`VOTRE_USER.pythonanywhere.com` est déjà autorisé : `DJANGO_ALLOWED_HOSTS` ne sert que pour un
+domaine personnalisé.
+
+### 3. Base de données et fichiers statiques
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py collectstatic --noinput     # ~156 fichiers hachés + gzip dans staticfiles/
+python manage.py check --deploy              # attendu : 2 avertissements seulement (W004 HSTS, W008 SSL redirect)
+```
+
+`collectstatic` affiche trois messages « Found another file … admin/js/… » : normal, Unfold
+remplace des fichiers de l'admin Django.
+
+### 4. Onglet *Web*
+
+*Add a new web app* → *Next* → **Manual configuration** (pas « Django ») → **Python 3.12**
+(la même version que le virtualenv), puis dans la page de l'application :
 
 | Champ | Valeur |
 |---|---|
 | Source code | `/home/VOTRE_USER/django-electronic` |
 | Working directory | `/home/VOTRE_USER/django-electronic` |
 | Virtualenv | `/home/VOTRE_USER/.virtualenvs/electronics` |
-| Force HTTPS | activé |
+| Static files | **rien à ajouter** : WhiteNoise sert `staticfiles/` |
+| Force HTTPS | **activé** |
 
-Aucun mappage *Static files* n'est nécessaire : WhiteNoise sert `staticfiles/`.
-
-Cliquez sur le lien du **fichier WSGI** (`/var/www/VOTRE_USER_pythonanywhere_com_wsgi.py`),
-**remplacez tout son contenu** par :
+Cliquez sur le lien du **fichier WSGI** (`/var/www/VOTRE_USER_pythonanywhere_com_wsgi.py`) et
+**remplacez tout son contenu** par (en remplaçant `VOTRE_USER`) :
 
 ```python
 import os
@@ -250,6 +329,7 @@ path = "/home/VOTRE_USER/django-electronic"
 if path not in sys.path:
     sys.path.insert(0, path)
 
+# Le site web ne lit pas le hook postactivate : on fixe les réglages ici.
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.production"  # la clé secrète vient du .env
 
 from django.core.wsgi import get_wsgi_application  # noqa: E402
@@ -257,22 +337,56 @@ from django.core.wsgi import get_wsgi_application  # noqa: E402
 application = get_wsgi_application()
 ```
 
-Sauvegardez, puis **Reload** sur l'onglet *Web* : le site est en ligne sur
-`https://VOTRE_USER.pythonanywhere.com/` (redirigé vers `/fr/`).
+**Save**, puis **Reload** en haut de l'onglet *Web*.
+
+### 5. Vérifier
+
+- `https://VOTRE_USER.pythonanywhere.com/` → redirige vers `/fr/` ; `/en/` affiche l'anglais.
+- `/admin/` (ou votre `DJANGO_ADMIN_URL`) → connexion avec le compte créé à l'étape 3.
+- Créez un chapitre, un concept avec un lien Falstad, une question avec ses réponses : la page du
+  concept affiche la simulation, et réussir le quiz fait monter « Concepts maîtrisés ».
+
+Depuis la console, contrôle rapide des codes HTTP :
 
 ```bash
-# ─── Mise à jour ultérieure ────────────────────────────────────────────────────
-cd ~/django-electronic && workon electronics
+U=https://VOTRE_USER.pythonanywhere.com
+for p in / /fr/ /en/ /admin/login/; do printf "%s %s\n" "$(curl -s -o /dev/null -w '%{http_code}' $U$p)" "$p"; done
+# attendu : 302 /   puis 200 pour les autres
+```
+
+**En cas de page d'erreur** : onglet *Web* → *Log files* → **Error log** (les erreurs 500
+y sont journalisées avec leur trace). Causes fréquentes :
+
+| Symptôme dans l'error log | Cause | Correction |
+|---|---|---|
+| `ImproperlyConfigured: Set a real DJANGO_SECRET_KEY` | `.env` absent ou clé `change-me` | étape 2, puis Reload |
+| `No module named 'tailwind'` (console) | `DJANGO_SETTINGS_MODULE` non défini | étape 1 (`postactivate`), puis `workon electronics` |
+| `Missing staticfiles manifest entry` | `collectstatic` non lancé | étape 3, puis Reload |
+| `DisallowedHost` | domaine personnalisé non déclaré | l'ajouter à `DJANGO_ALLOWED_HOSTS` dans `.env` |
+| page sans style | mauvais *Working directory* ou `collectstatic` oublié | vérifier l'onglet *Web* |
+
+### 6. Mettre à jour le site
+
+```bash
+cd ~/django-electronic
+workon electronics                   # recharge DJANGO_SETTINGS_MODULE via postactivate
 git pull
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-# puis « Reload » dans l'onglet Web
 ```
 
-Notes : sur le plan gratuit, il faut renouveler l'application (bouton de l'onglet *Web*) tous les
-trois mois. `db.sqlite3` n'est pas dans git : sauvegardez-le avec `cp db.sqlite3 ~/backup-$(date +%F).sqlite3`.
-Pour ajouter votre propre domaine, ajoutez-le à `DJANGO_ALLOWED_HOSTS` dans `.env`.
+Puis **Reload** dans l'onglet *Web*.
+
+### Bon à savoir
+
+- **Plan gratuit** : l'application doit être prolongée tous les **3 mois** (bouton *Run until 3
+  months from today* de l'onglet *Web*), sinon elle est désactivée.
+- **Sauvegarde** : `db.sqlite3` n'est pas dans git. `cp ~/django-electronic/db.sqlite3 ~/backup-$(date +%F).sqlite3`
+- **Domaine personnalisé** : ajoutez-le à `DJANGO_ALLOWED_HOSTS` dans `.env`, puis Reload.
+- **HTTPS strict** (facultatif, une fois le HTTPS validé) : `DJANGO_SSL_REDIRECT=1` et
+  `DJANGO_HSTS_SECONDS=31536000` dans `.env`. HSTS est mémorisé par les navigateurs : ne
+  l'activez pas pour essayer.
 
 ---
 

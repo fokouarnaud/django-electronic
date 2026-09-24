@@ -316,3 +316,25 @@ def test_ci_runs_lint_tests_and_migration_check():
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     for step in ("ruff check", "ruff format --check", "pytest", "makemigrations --check"):
         assert step in workflow
+
+
+@pytest.mark.parametrize(
+    "weak_key",
+    [
+        "change-me",  # the .env.example placeholder: public on GitHub
+        "short-but-random-3f9a",  # < 50 characters (Django's W009 threshold)
+        "a" * 60,  # < 5 distinct characters
+    ],
+)
+def test_production_rejects_placeholder_and_weak_keys(monkeypatch, tmp_path, weak_key):
+    with pytest.raises(ImproperlyConfigured, match="DJANGO_SECRET_KEY"):
+        load(monkeypatch, "production", tmp_path, DJANGO_SECRET_KEY=weak_key)
+
+
+def test_env_example_placeholder_is_rejected_in_production(monkeypatch, tmp_path):
+    """Forgetting to edit the copied .env must stop the site, not run it with a public key."""
+    env_file = tmp_path / ".env"
+    env_file.write_text((ROOT / ".env.example").read_text(encoding="utf-8"), encoding="utf-8")
+    with pytest.raises(ImproperlyConfigured):
+        load(monkeypatch, "production", tmp_path, DJANGO_ENV_FILE=str(env_file))
+    monkeypatch.delenv("DJANGO_SECRET_KEY", raising=False)  # read_env populated os.environ

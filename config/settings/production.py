@@ -10,8 +10,22 @@ from django.core.exceptions import ImproperlyConfigured
 from .base import *  # noqa: F401,F403
 from .base import BASE_DIR, INSECURE_DEV_SECRET_KEY, SECRET_KEY, env
 
-if not SECRET_KEY or SECRET_KEY == INSECURE_DEV_SECRET_KEY or SECRET_KEY.startswith("django-insecure"):
-    raise ImproperlyConfigured("Set a real DJANGO_SECRET_KEY in the environment (or .env) for production.")
+# Refuse to start with a key anyone can know: missing, the dev placeholder, the
+# ".env.example" text (public on GitHub), or too weak by Django's own W009 rule
+# (fewer than 50 characters or fewer than 5 distinct ones).
+_PLACEHOLDER_KEYS = {INSECURE_DEV_SECRET_KEY, "change-me"}
+if (
+    not SECRET_KEY
+    or SECRET_KEY in _PLACEHOLDER_KEYS
+    or SECRET_KEY.startswith("django-insecure")
+    or len(SECRET_KEY) < 50
+    or len(set(SECRET_KEY)) < 5
+):
+    raise ImproperlyConfigured(
+        "Set a real DJANGO_SECRET_KEY (50+ random characters) in the environment or .env for "
+        'production. Generate one with: python -c "from django.core.management.utils import '
+        'get_random_secret_key as k; print(k())"'
+    )
 
 DEBUG = False  # never driven by the environment
 
